@@ -1,0 +1,51 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: ScheduledSparkApplication
+metadata:
+  name: helloworld-scheduled
+  namespace: default
+spec:
+  # Run every 3 minutes
+  schedule: "@every 1m"
+  concurrencyPolicy: Allow
+  template:
+    type: Scala
+    mode: cluster
+    # Our custom image with the JAR already inside
+    image: rajendar38/spark-helloworld:latest
+    imagePullPolicy: IfNotPresent
+    # Main class of your Java program
+    mainClass: com.example.HelloWorld
+    # Local path inside container to the JAR
+    mainApplicationFile: local:///opt/spark/examples/jars/helloworld.jar
+    sparkVersion: 4.0.0
+    restartPolicy:
+      type: Never
+    driver:
+      cores: 1
+      memory: 512m
+      serviceAccount: spark-operator-spark
+      securityContext:
+        capabilities:
+          drop:
+          - ALL
+        runAsGroup: 185
+        runAsUser: 185
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        seccompProfile:
+          type: RuntimeDefault      
+    executor:
+      instances: 1
+      cores: 1
+      memory: 512m
+      securityContext:
+        capabilities:
+          drop:
+          - ALL
+        runAsGroup: 185
+        runAsUser: 185
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        seccompProfile:
+          type: RuntimeDefault
+
